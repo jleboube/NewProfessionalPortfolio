@@ -1,0 +1,159 @@
+# ============================================
+# Secrets & Environment Variables
+# ============================================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# ============================================
+# Personal Data & Uploads
+# ============================================
+# User uploaded files (images, resumes, etc.)
+uploads/
+
+# Portfolio content data
+content/data.json
+
+# Backup files
+*.backup
+*.bak
+backups/
+
+# ============================================
+# Node.js
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Dependency directories
+jspm_packages/
+
+# Build output
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+
+# ============================================
+# Docker
+# ============================================
+# Don't ignore docker-compose.yml, but ignore overrides
+docker-compose.override.yml
+
+# Docker volumes (if using named volumes)
+.docker/
+
+# ============================================
+# IDEs & Editors
+# ============================================
+# VSCode
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================
+# Operating System
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# Logs
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# Testing
+# ============================================
+coverage/
+*.lcov
+.nyc_output/
+
+# ============================================
+# Temporary Files
+# ============================================
+tmp/
+temp/
+*.tmp
+*.temp
+.cache/
+
+# ============================================
+# SSL Certificates
+# ============================================
+*.crt
+*.cer
+*.ca-bundle
+*.p7b
+*.p7s
+*.spc
+
+# ============================================
+# Database
+# ============================================
+*.sqlite
+*.sqlite3
+*.db
+
+# ============================================
+# Optional: Keep sample data for testing
+# ============================================
+# If you want to include a sample data.json for testing:
+# !content/data.example.json

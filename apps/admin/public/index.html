@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-50">
+    <div x-data="adminApp()" x-init="init()" class="min-h-screen">
+        <nav class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-xl font-semibold">Portfolio Admin</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="activeTab = 'content'" :class="activeTab === 'content' ? 'text-blue-600' : 'text-gray-600'" class="px-3 py-2">
+                            Content
+                        </button>
+                        <button @click="activeTab = 'blog'" :class="activeTab === 'blog' ? 'text-blue-600' : 'text-gray-600'" class="px-3 py-2" x-show="data.blogEnabled">
+                            Blog
+                        </button>
+                        <button @click="activeTab = 'media'" :class="activeTab === 'media' ? 'text-blue-600' : 'text-gray-600'" class="px-3 py-2">
+                            Media Library
+                        </button>
+                        <button @click="activeTab = 'backup'" :class="activeTab === 'backup' ? 'text-blue-600' : 'text-gray-600'" class="px-3 py-2">
+                            Backup
+                        </button>
+                        <button @click="saveData()" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <template x-if="!data.setupCompleted && showSetup">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold mb-6">Welcome! Let's set up your portfolio</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Your Name</label>
+                            <input type="text" x-model="setupAnswers.name" class="w-full px-3 py-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Professional Title</label>
+                            <input type="text" x-model="setupAnswers.title" class="w-full px-3 py-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Bio</label>
+                            <textarea x-model="setupAnswers.bio" rows="3" class="w-full px-3 py-2 border rounded"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Location</label>
+                            <input type="text" x-model="setupAnswers.location" class="w-full px-3 py-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Email</label>
+                            <input type="email" x-model="setupAnswers.email" class="w-full px-3 py-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">GitHub Username</label>
+                            <input type="text" x-model="setupAnswers.githubUsername" class="w-full px-3 py-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">LinkedIn Username</label>
+                            <input type="text" x-model="setupAnswers.linkedInUsername" placeholder="e.g., john-doe" class="w-full px-3 py-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Enable Blog?</label>
+                            <select x-model="setupAnswers.blogEnabled" class="w-full px-3 py-2 border rounded">
+                                <option value="false">No</option>
+                                <option value="true">Yes</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Resume Upload Section -->
+                        <div class="border-t pt-4">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Upload Resume (Optional)</label>
+                                <p class="text-sm text-gray-600 mb-3">Upload your resume to automatically populate your profile and experience information. We support PDF and DOCX files.</p>
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center" 
+                                     :class="{'border-blue-400 bg-blue-50': resumeUploading, 'border-green-400 bg-green-50': resumeParsed}">
+                                    <input type="file" id="resumeUpload" accept=".pdf,.docx" class="hidden" @change="uploadResume($event)">
+                                    <template x-if="!resumeUploading && !resumeParsed">
+                                        <label for="resumeUpload" class="cursor-pointer">
+                                            <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <span class="font-medium text-blue-600 hover:text-blue-500">Click to upload resume</span>
+                                            <p class="text-xs text-gray-500 mt-1">PDF or DOCX, up to 10MB</p>
+                                        </label>
+                                    </template>
+                                    <template x-if="resumeUploading">
+                                        <div class="flex items-center justify-center">
+                                            <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <span>Parsing resume...</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="resumeParsed && !resumeUploading">
+                                        <div class="text-green-600">
+                                            <svg class="mx-auto h-8 w-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            <span>Resume parsed successfully!</span>
+                                            <button @click="resumeParsed = false; resumeData = null" class="ml-2 text-sm underline">Upload different resume</button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            
+                            <!-- Resume Review Section -->
+                            <template x-if="resumeParsed && resumeData">
+                                <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                                    <h4 class="font-medium mb-3">Review Parsed Information</h4>
+                                    <p class="text-sm text-gray-600 mb-4">Please review and edit the information we extracted from your resume:</p>
+                                    
+                                    <div class="space-y-4">
+                                        <!-- Profile Information Preview -->
+                                        <div>
+                                            <h5 class="font-medium text-sm mb-2">Profile Information:</h5>
+                                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                                <div x-show="resumeData.profile.name">
+                                                    <strong>Name:</strong> <span x-text="resumeData.profile.name"></span>
+                                                </div>
+                                                <div x-show="resumeData.profile.email">
+                                                    <strong>Email:</strong> <span x-text="resumeData.profile.email"></span>
+                                                </div>
+                                                <div x-show="resumeData.profile.location">
+                                                    <strong>Location:</strong> <span x-text="resumeData.profile.location"></span>
+                                                </div>
+                                                <div x-show="resumeData.profile.phone">
+                                                    <strong>Phone:</strong> <span x-text="resumeData.profile.phone"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Experience Preview -->
+                                        <div x-show="resumeData.experience && resumeData.experience.length > 0">
+                                            <h5 class="font-medium text-sm mb-2">Experience (<span x-text="resumeData.experience.length"></span> entries found):</h5>
+                                            <div class="max-h-32 overflow-y-auto">
+                                                <template x-for="exp in resumeData.experience.slice(0, 3)">
+                                                    <div class="text-sm mb-2 pl-2 border-l-2 border-blue-200">
+                                                        <strong x-text="exp.role"></strong> at <span x-text="exp.company"></span>
+                                                        <div class="text-gray-600" x-text="`${exp.start} - ${exp.end || 'Present'}`"></div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Education Preview -->
+                                        <div x-show="resumeData.education && resumeData.education.length > 0">
+                                            <h5 class="font-medium text-sm mb-2">Education (<span x-text="resumeData.education.length"></span> entries found):</h5>
+                                            <template x-for="edu in resumeData.education.slice(0, 2)">
+                                                <div class="text-sm mb-1" x-text="edu.degree || edu.school"></div>
+                                            </template>
+                                        </div>
+                                        
+                                        <!-- Awards Preview -->
+                                        <div x-show="resumeData.awards && resumeData.awards.length > 0">
+                                            <h5 class="font-medium text-sm mb-2">Awards (<span x-text="resumeData.awards.length"></span> found):</h5>
+                                            <template x-for="award in resumeData.awards">
+                                                <div class="text-sm mb-1" x-text="award.award"></div>
+                                            </template>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center pt-2 border-t">
+                                            <span class="text-sm text-gray-600">This information will be imported when you complete setup.</span>
+                                            <button @click="useResumeData()" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                                                Apply to Form
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <button @click="completeSetup()" class="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Complete Setup
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="data.setupCompleted || !showSetup">
+                <div>
+                    <!-- Content Tab -->
+                    <div x-show="activeTab === 'content'" class="space-y-6">
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="px-6 py-4 border-b">
+                                <h2 class="text-lg font-semibold">Profile Information</h2>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div class="flex items-start space-x-4">
+                                    <div class="flex-1 grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Name</label>
+                                            <input type="text" x-model="data.profile.name" class="w-full px-3 py-2 border rounded">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Title</label>
+                                            <input type="text" x-model="data.profile.title" class="w-full px-3 py-2 border rounded">
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <label class="block text-sm font-medium mb-1">Profile Photo</label>
+                                        <div class="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-blue-500" @click="selectImageFor('profile')">
+                                            <template x-if="data.profile.photo">
+                                                <img :src="data.profile.photo" class="w-full h-full object-cover rounded-lg">
+                                            </template>
+                                            <template x-if="!data.profile.photo">
+                                                <span class="text-gray-400 text-sm">Click to select</span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Bio</label>
+                                    <textarea x-model="data.profile.bio" rows="3" class="w-full px-3 py-2 border rounded"></textarea>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Location</label>
+                                        <input type="text" x-model="data.profile.location" class="w-full px-3 py-2 border rounded">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Email</label>
+                                        <input type="email" x-model="data.profile.email" class="w-full px-3 py-2 border rounded">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">GitHub Username</label>
+                                        <input type="text" x-model="data.profile.githubUsername" class="w-full px-3 py-2 border rounded">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">LinkedIn Username</label>
+                                        <input type="text" x-model="data.profile.linkedInUsername" placeholder="e.g., john-doe" class="w-full px-3 py-2 border rounded">
+                                    </div>
+                                    <div class="col-span-3">
+                                        <label class="block text-sm font-medium mb-1">Resume Download URL</label>
+                                        <input type="text" x-model="data.profile.resumeDownloadUrl" placeholder="https://example.com/resume.pdf or /uploads/your-resume.pdf" class="w-full px-3 py-2 border rounded">
+                                        <p class="text-xs text-gray-500 mt-1">Enter a URL to your resume (can be external link or uploaded file path). Leave blank to hide the Download Resume button.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-6 py-4 border-t bg-gray-50">
+                                <button @click="saveData()" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="px-6 py-4 border-b flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Resume</h2>
+                                <button @click="addResumeEntry()" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                                    Add Entry
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <template x-for="(entry, index) in data.resume" :key="index">
+                                    <div class="mb-4 p-4 border rounded">
+                                        <div class="flex items-center gap-2 mb-3">
+                                            <span x-text="entry.type === 'education' ? '🎓' : entry.type === 'awards' ? '🏆' : entry.type === 'certifications' ? '📜' : '💼'"></span>
+                                            <select x-model="entry.type" class="px-2 py-1 border rounded text-sm">
+                                                <option value="experience">Experience</option>
+                                                <option value="education">Education</option>
+                                                <option value="awards">Awards</option>
+                                                <option value="certifications">Certifications</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Experience Fields -->
+                                        <template x-if="entry.type === 'experience' || !entry.type">
+                                            <div>
+                                                <div class="grid grid-cols-2 gap-4 mb-2">
+                                                    <input type="text" x-model="entry.company" placeholder="Company" class="px-3 py-2 border rounded">
+                                                    <input type="text" x-model="entry.role" placeholder="Role" class="px-3 py-2 border rounded">
+                                                </div>
+                                            </div>
+                                        </template>
+                                        
+                                        <!-- Education Fields -->
+                                        <template x-if="entry.type === 'education'">
+                                            <div>
+                                                <div class="grid grid-cols-2 gap-4 mb-2">
+                                                    <input type="text" x-model="entry.school" placeholder="School/University" class="px-3 py-2 border rounded">
+                                                    <input type="text" x-model="entry.degree" placeholder="Degree/Program" class="px-3 py-2 border rounded">
+                                                </div>
+                                            </div>
+                                        </template>
+                                        
+                                        <!-- Awards Fields -->
+                                        <template x-if="entry.type === 'awards'">
+                                            <div>
+                                                <div class="grid grid-cols-2 gap-4 mb-2">
+                                                    <input type="text" x-model="entry.organization" placeholder="Organization" class="px-3 py-2 border rounded">
+                                                    <input type="text" x-model="entry.award" placeholder="Award Name" class="px-3 py-2 border rounded">
+                                                </div>
+                                            </div>
+                                        </template>
+                                        
+                                        <!-- Certification Fields -->
+                                        <template x-if="entry.type === 'certifications'">
+                                            <div class="space-y-2">
+                                                <input type="text" x-model="entry.certification" placeholder="Certification Name" class="w-full px-3 py-2 border rounded">
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <input type="text" x-model="entry.issuer" placeholder="Issuing Organization" class="px-3 py-2 border rounded">
+                                                    <input type="text" x-model="entry.credentialId" placeholder="Credential ID (optional)" class="px-3 py-2 border rounded">
+                                                </div>
+                                                <input type="text" x-model="entry.credentialUrl" placeholder="Verification URL (optional)" class="w-full px-3 py-2 border rounded">
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-1">Certification Logo (optional)</label>
+                                                    <div class="flex items-center gap-4">
+                                                        <div class="w-20 h-20 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:border-blue-500" @click="selectImageFor('certification', index)">
+                                                            <template x-if="entry.logo">
+                                                                <img :src="entry.logo" class="w-full h-full object-contain rounded p-1">
+                                                            </template>
+                                                            <template x-if="!entry.logo">
+                                                                <span class="text-gray-400 text-xs text-center px-1">Click to select</span>
+                                                            </template>
+                                                        </div>
+                                                        <template x-if="entry.logo">
+                                                            <button @click.stop="entry.logo = ''" class="text-red-600 text-xs hover:underline">Remove Logo</button>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        
+                                        <div class="grid grid-cols-2 gap-4 mb-2">
+                                            <input type="text" x-model="entry.start" placeholder="Start Date" class="px-3 py-2 border rounded">
+                                            <input type="text" x-model="entry.end" placeholder="End Date (or Present)" class="px-3 py-2 border rounded">
+                                        </div>
+                                        <textarea x-model="entry.summary" placeholder="Description/Summary" rows="2" class="w-full px-3 py-2 border rounded mb-2"></textarea>
+                                        <button @click="removeResumeEntry(index)" class="text-red-600 text-sm hover:underline">Remove</button>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="px-6 py-4 border-t bg-gray-50">
+                                <button @click="saveData()" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="px-6 py-4 border-b flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Projects</h2>
+                                <button @click="addProject()" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                                    Add Project
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <template x-for="(project, index) in data.projects" :key="index">
+                                    <div class="mb-4 p-4 border rounded">
+                                        <div class="flex items-start space-x-4">
+                                            <div class="flex-1">
+                                                <input type="text" x-model="project.name" placeholder="Project Name" class="w-full px-3 py-2 border rounded mb-2">
+                                                <textarea x-model="project.description" placeholder="Description" rows="2" class="w-full px-3 py-2 border rounded mb-2"></textarea>
+                                                <div class="grid grid-cols-2 gap-2 mb-2">
+                                                    <input type="text" x-model="project.url" placeholder="Live URL" class="px-3 py-2 border rounded">
+                                                    <input type="text" x-model="project.source" placeholder="Source Code URL" class="px-3 py-2 border rounded">
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <input type="checkbox" :id="'featured-' + index" x-model="project.featuredOnHome" class="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                                    <label :for="'featured-' + index" class="text-sm font-medium text-gray-700">
+                                                        Featured on Home Page
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <label class="block text-sm font-medium mb-1">Project Image</label>
+                                                <div class="w-32 h-24 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:border-blue-500" @click="selectImageFor('project', index)">
+                                                    <template x-if="project.image">
+                                                        <img :src="project.image" class="w-full h-full object-cover rounded">
+                                                    </template>
+                                                    <template x-if="!project.image">
+                                                        <span class="text-gray-400 text-xs">Click to select</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button @click="removeProject(index)" class="text-red-600 text-sm hover:underline mt-2">Remove</button>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="px-6 py-4 border-t bg-gray-50">
+                                <button @click="saveData()" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="px-6 py-4 border-b flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Services</h2>
+                                <button @click="addService()" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                                    Add Service
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <template x-for="(service, index) in data.services" :key="index">
+                                    <div class="mb-4 p-4 border rounded space-y-3">
+                                        <div class="space-y-3">
+                                            <input type="text" x-model="service.title" placeholder="Service Title (e.g., Technical Advisory)" class="w-full px-3 py-2 border rounded">
+                                            <textarea x-model="service.summary" placeholder="Service Overview" rows="3" class="w-full px-3 py-2 border rounded"></textarea>
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Highlights (one per line)</label>
+                                                <textarea
+                                                    x-model="service.highlightsString"
+                                                    rows="4"
+                                                    class="w-full px-3 py-2 border rounded"
+                                                    placeholder="Strategic cloud migration planning&#10;Executive stakeholder alignment workshops&#10;Hands-on delivery leadership"
+                                                ></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                                            <span>Each highlight becomes a bullet point on the site.</span>
+                                            <button @click="removeService(index)" class="text-red-600 hover:underline">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="data.services.length === 0">
+                                    <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                                        <p>No services added yet. Click &ldquo;Add Service&rdquo; to outline how you help clients.</p>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="px-6 py-4 border-t bg-gray-50">
+                                <button @click="saveData()" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="px-6 py-4 border-b flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Skills & Expertise</h2>
+                                <button @click="addSkill()" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                                    Add Skill
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <template x-for="(skill, index) in data.skills" :key="index">
+                                    <div class="mb-4 p-4 border rounded">
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                                            <div>
+                                                <input type="text" x-model="skill.name" placeholder="Skill Name (e.g., JavaScript, Leadership)" class="w-full px-3 py-2 border rounded">
+                                            </div>
+                                            <div>
+                                                <select x-model="skill.category" class="w-full px-3 py-2 border rounded">
+                                                    <option value="">Select Category</option>
+                                                    <option value="technical">Technical Skills</option>
+                                                    <option value="professional">Professional Skills</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <input type="range" x-model="skill.level" min="1" max="100" class="flex-1">
+                                                <span class="text-sm font-medium w-12" x-text="skill.level + '%'"></span>
+                                            </div>
+                                        </div>
+                                        <button @click="removeSkill(index)" class="text-red-600 text-sm hover:underline">Remove</button>
+                                    </div>
+                                </template>
+                                <template x-if="data.skills.length === 0">
+                                    <div class="text-center text-gray-500 py-8">
+                                        <p>No skills added yet. Click "Add Skill" to showcase your expertise!</p>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="px-6 py-4 border-t bg-gray-50">
+                                <button @click="saveData()" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="px-6 py-4 border-b">
+                                <h2 class="text-lg font-semibold">Settings</h2>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" x-model="data.blogEnabled" class="mr-2">
+                                        <span>Enable Blog</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Light/Dark Mode</label>
+                                    <select x-model="data.theme" class="w-full px-3 py-2 border rounded">
+                                        <option value="system">System</option>
+                                        <option value="light">Light</option>
+                                        <option value="dark">Dark</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Color Theme</label>
+                                    <select x-model="data.colorTheme" class="w-full px-3 py-2 border rounded">
+                                        <option value="ocean">Ocean Blue</option>
+                                        <option value="forest">Forest Green</option>
+                                        <option value="sunset">Sunset Orange</option>
+                                        <option value="purple">Royal Purple</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="px-6 py-4 border-t bg-gray-50">
+                                <button @click="saveData()" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Media Library Tab -->
+                    <div x-show="activeTab === 'media'" class="bg-white rounded-lg shadow p-6">
+                        <div class="mb-6">
+                            <h2 class="text-lg font-semibold mb-4">Media Library</h2>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+                                 @dragover.prevent="$event.currentTarget.classList.add('border-blue-400', 'bg-blue-50')"
+                                 @dragleave.prevent="$event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50')"
+                                 @drop.prevent="handleDrop($event)">
+                                <input type="file" id="fileUpload" accept="image/*" class="hidden" @change="uploadImage($event)">
+                                <label for="fileUpload" class="cursor-pointer">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-600">
+                                        <span class="font-medium text-blue-600 hover:text-blue-500">Click to upload</span> or drag and drop
+                                    </p>
+                                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div x-show="uploading" class="mb-4 p-4 bg-blue-50 rounded">
+                            <div class="flex items-center">
+                                <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Uploading...</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-4">
+                            <template x-for="image in images" :key="image.filename">
+                                <div class="relative group">
+                                    <img :src="image.thumbnailUrl || image.url" class="w-full h-32 object-cover rounded cursor-pointer" @click="selectImage(image.hqUrl || image.url)">
+                                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+                                        <button @click="deleteImage(image.filename)" class="px-2 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="mt-6 pt-4 border-t bg-gray-50 -mx-6 px-6 py-4">
+                            <button @click="saveData()" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Backup Tab -->
+                    <div x-show="activeTab === 'backup'" class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-lg font-semibold mb-6">Backup Your Data</h2>
+                        <p class="text-gray-600 mb-6">Create a backup of your portfolio data to easily restore or transfer to a new instance.</p>
+
+                        <template x-if="!backupStep || backupStep === 'initial'">
+                            <div class="space-y-4">
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                        </svg>
+                                        <div>
+                                            <h3 class="font-semibold text-yellow-800 mb-1">Do you have unsaved changes?</h3>
+                                            <p class="text-sm text-yellow-700 mb-3">If you have made changes since your last save, please save them before creating a backup.</p>
+                                            <div class="flex gap-3">
+                                                <button @click="backupStep = 'goToSave'" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors">
+                                                    Yes, I need to save
+                                                </button>
+                                                <button @click="backupStep = 'selectType'" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
+                                                    No, proceed with backup
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="backupStep === 'goToSave'">
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <div>
+                                            <h3 class="font-semibold text-blue-800 mb-1">Save Your Changes</h3>
+                                            <p class="text-sm text-blue-700 mb-3">Please go to the Content tab and click "Save Changes" to save your work. Then come back here to create your backup.</p>
+                                            <button @click="activeTab = 'content'; backupStep = 'initial'" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                                                Go to Content Tab
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="backupStep === 'selectType'">
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                                    <h3 class="font-semibold text-gray-800 mb-4">Select Backup Type</h3>
+                                    <div class="space-y-3">
+                                        <button @click="downloadBackup('content')" class="w-full text-left p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                                            <div class="flex items-start">
+                                                <svg class="w-6 h-6 text-gray-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                </svg>
+                                                <div>
+                                                    <h4 class="font-semibold mb-1">Content Only</h4>
+                                                    <p class="text-sm text-gray-600">Download your profile data, projects, resume, and blog posts (JSON file)</p>
+                                                </div>
+                                            </div>
+                                        </button>
+
+                                        <button @click="downloadBackup('full')" class="w-full text-left p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                                            <div class="flex items-start">
+                                                <svg class="w-6 h-6 text-gray-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                </svg>
+                                                <div>
+                                                    <h4 class="font-semibold mb-1">Content + Media</h4>
+                                                    <p class="text-sm text-gray-600">Download everything including images from Media Library (ZIP file)</p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    <div class="mt-4 pt-4 border-t border-gray-200">
+                                        <button @click="backupStep = 'initial'" class="text-gray-600 hover:text-gray-800 text-sm">
+                                            ← Back
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="backupDownloading">
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+                                <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <p class="text-blue-800 font-semibold">Preparing your backup...</p>
+                                <p class="text-sm text-blue-600 mt-1">This may take a moment for large media libraries</p>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Blog Tab -->
+                    <div x-show="activeTab === 'blog'" class="space-y-6">
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="px-6 py-4 border-b flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Blog Posts</h2>
+                                <button @click="addBlogPost()" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                                    New Post
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <template x-for="(post, index) in data.blogPosts" :key="index">
+                                    <div class="mb-6 p-4 border rounded">
+                                        <div class="flex items-start justify-between mb-4">
+                                            <div class="flex-1">
+                                                <input type="text" x-model="post.title" placeholder="Post Title" class="text-lg font-semibold w-full px-3 py-2 border rounded mb-2">
+                                                <input type="text" x-model="post.slug" placeholder="URL slug (e.g., my-first-post)" class="w-full px-3 py-2 border rounded mb-2 text-sm">
+                                            </div>
+                                            <div class="flex-shrink-0 ml-4">
+                                                <label class="block text-sm font-medium mb-1">Featured Image</label>
+                                                <div class="w-32 h-20 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:border-blue-500" @click="selectImageFor('blog', index)">
+                                                    <template x-if="post.featuredImage">
+                                                        <img :src="post.featuredImage" class="w-full h-full object-cover rounded">
+                                                    </template>
+                                                    <template x-if="!post.featuredImage">
+                                                        <span class="text-gray-400 text-xs">Click to select</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-3 gap-4 mb-4">
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Date</label>
+                                                <input type="date" x-model="post.date" class="w-full px-3 py-2 border rounded">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Status</label>
+                                                <select x-model="post.status" class="w-full px-3 py-2 border rounded">
+                                                    <option value="draft">Draft</option>
+                                                    <option value="published">Published</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Tags (comma separated)</label>
+                                                <input type="text" x-model="post.tagsString" placeholder="tech, tutorial, programming" class="w-full px-3 py-2 border rounded">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium mb-1">Excerpt</label>
+                                            <textarea x-model="post.excerpt" placeholder="A brief summary of the post..." rows="2" class="w-full px-3 py-2 border rounded"></textarea>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium mb-1">Content</label>
+                                            <textarea x-model="post.content" placeholder="Write your blog post content here..." rows="10" class="w-full px-3 py-2 border rounded font-mono text-sm"></textarea>
+                                            <div class="mt-2 text-xs text-gray-500">
+                                                You can use line breaks and basic formatting. HTML is supported.
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-center justify-between">
+                                            <div class="text-sm text-gray-500">
+                                                ID: <span class="font-mono" x-text="post.id"></span>
+                                            </div>
+                                            <button @click="removeBlogPost(index)" class="text-red-600 text-sm hover:underline">
+                                                Delete Post
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <template x-if="data.blogPosts.length === 0">
+                                    <div class="text-center text-gray-500 py-8">
+                                        <p>No blog posts yet. Create your first post!</p>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="px-6 py-4 border-t bg-gray-50">
+                                <button @click="saveData()" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Selector Modal -->
+                    <div x-show="showImageSelector" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+                        <div class="flex items-center justify-center min-h-screen px-4">
+                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showImageSelector = false"></div>
+                            <div class="relative bg-white rounded-lg max-w-3xl w-full p-6">
+                                <h3 class="text-lg font-semibold mb-4">Select an Image</h3>
+                                <div class="grid grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+                                    <template x-for="image in images" :key="image.filename">
+                                        <img :src="image.thumbnailUrl || image.url" class="w-full h-24 object-cover rounded cursor-pointer hover:ring-2 hover:ring-blue-500" @click="selectBestImageUrl(image)">
+                                    </template>
+                                </div>
+                                <div class="mt-4 flex justify-end">
+                                    <button @click="showImageSelector = false" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <script>
+        function adminApp() {
+            return {
+                data: {
+                    profile: {},
+                    resume: [],
+                    projects: [],
+                    services: [],
+                    skills: [],
+                    blogPosts: []
+                },
+                showSetup: true,
+                activeTab: 'content',
+                images: [],
+                uploading: false,
+                showImageSelector: false,
+                imageSelectionTarget: null,
+                imageSelectionIndex: null,
+                setupAnswers: {
+                    name: '',
+                    title: '',
+                    bio: '',
+                    location: '',
+                    email: '',
+                    githubUsername: '',
+                    linkedInUsername: '',
+                    blogEnabled: false
+                },
+                resumeUploading: false,
+                resumeParsed: false,
+                resumeData: null,
+                backupStep: 'initial',
+                backupDownloading: false,
+                
+                async init() {
+                    await this.loadData();
+                    await this.loadImages();
+                },
+                
+                async loadData() {
+                    try {
+                        const response = await fetch('/api/data');
+                        const data = await response.json();
+                        this.data = {
+                            ...data,
+                            profile: {
+                                ...data.profile,
+                                resumeDownloadUrl: data.profile?.resumeDownloadUrl || ''
+                            },
+                            resume: (data.resume || []).map(entry => ({
+                                ...entry,
+                                certification: entry.certification || '',
+                                issuer: entry.issuer || '',
+                                credentialId: entry.credentialId || '',
+                                credentialUrl: entry.credentialUrl || '',
+                                logo: entry.logo || ''
+                            })),
+                            projects: (data.projects || []).map(project => ({
+                                ...project,
+                                featuredOnHome: project.featuredOnHome !== undefined ? project.featuredOnHome : true
+                            })),
+                            services: (data.services || []).map(service => ({
+                                ...service,
+                                title: service.title || '',
+                                summary: service.summary || '',
+                                highlights: Array.isArray(service.highlights) ? service.highlights : [],
+                                highlightsString: Array.isArray(service.highlights) ? service.highlights.join('\n') : ''
+                            })),
+                            skills: data.skills || [],
+                            blogPosts: (data.blogPosts || []).map(post => ({
+                                ...post,
+                                tags: post.tags || [],
+                                tagsString: post.tags ? post.tags.join(', ') : ''
+                            })),
+                            colorTheme: data.colorTheme || 'ocean'
+                        };
+                        this.showSetup = !this.data.setupCompleted;
+                    } catch (error) {
+                        console.error('Failed to load data:', error);
+                    }
+                },
+
+                async loadImages() {
+                    try {
+                        const response = await fetch('/api/images');
+                        this.images = await response.json();
+                    } catch (error) {
+                        console.error('Failed to load images:', error);
+                    }
+                },
+                
+                async saveData() {
+                    try {
+                        // Process blog posts before saving
+                        const processedData = { ...this.data };
+                        processedData.services = this.data.services.map(service => {
+                            const highlights = service.highlightsString
+                                ? service.highlightsString.split('\n').map(item => item.trim()).filter(item => item.length > 0)
+                                : [];
+                            const { highlightsString, ...rest } = service;
+                            return {
+                                ...rest,
+                                highlights
+                            };
+                        });
+                        processedData.blogPosts = this.data.blogPosts.map(post => ({
+                            ...post,
+                            tags: post.tagsString ? post.tagsString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : []
+                        }));
+
+                        const response = await fetch('/api/data', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(processedData)
+                        });
+                        if (response.ok) {
+                            alert('Changes saved successfully!');
+                        } else {
+                            alert('Failed to save changes');
+                        }
+                    } catch (error) {
+                        console.error('Failed to save data:', error);
+                        alert('Failed to save changes');
+                    }
+                },
+
+                handleDrop(event) {
+                    event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50');
+                    const files = event.dataTransfer.files;
+                    if (files.length > 0) {
+                        const file = files[0];
+                        if (file.type.startsWith('image/')) {
+                            // Create a fake event object for uploadImage
+                            const fakeEvent = { target: { files: [file] } };
+                            this.uploadImage(fakeEvent);
+                        }
+                    }
+                },
+
+                async uploadImage(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    this.uploading = true;
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    try {
+                        const response = await fetch('/api/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            const result = await response.json();
+                            await this.loadImages();
+                            event.target.value = '';
+                        } else {
+                            alert('Failed to upload image');
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        alert('Failed to upload image');
+                    } finally {
+                        this.uploading = false;
+                    }
+                },
+
+                async deleteImage(filename) {
+                    if (!confirm('Are you sure you want to delete this image?')) return;
+
+                    try {
+                        const response = await fetch(`/api/images/${filename}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            await this.loadImages();
+                        } else {
+                            alert('Failed to delete image');
+                        }
+                    } catch (error) {
+                        console.error('Delete error:', error);
+                        alert('Failed to delete image');
+                    }
+                },
+
+                selectImageFor(target, index = null) {
+                    this.imageSelectionTarget = target;
+                    this.imageSelectionIndex = index;
+                    this.showImageSelector = true;
+                },
+
+                confirmImageSelection(url) {
+                    console.log('confirmImageSelection called with URL:', url);
+                    console.log('imageSelectionTarget:', this.imageSelectionTarget);
+
+                    if (this.imageSelectionTarget === 'profile') {
+                        this.data.profile.photo = url;
+                        console.log('Set profile photo to:', url);
+                    } else if (this.imageSelectionTarget === 'project' && this.imageSelectionIndex !== null) {
+                        this.data.projects[this.imageSelectionIndex].image = url;
+                    } else if (this.imageSelectionTarget === 'blog' && this.imageSelectionIndex !== null) {
+                        this.data.blogPosts[this.imageSelectionIndex].featuredImage = url;
+                    } else if (this.imageSelectionTarget === 'certification' && this.imageSelectionIndex !== null) {
+                        this.data.resume[this.imageSelectionIndex].logo = url;
+                        console.log('Set certification logo to:', url);
+                    }
+                    this.showImageSelector = false;
+                    this.imageSelectionTarget = null;
+                    this.imageSelectionIndex = null;
+                },
+
+                selectImage(url) {
+                    if (this.imageSelectionTarget) {
+                        this.confirmImageSelection(url);
+                    }
+                },
+
+                async selectBestImageUrl(image) {
+                    console.log('selectBestImageUrl called with image:', image);
+                    // Try to use high-quality URL first, fallback to regular URL
+                    let bestUrl = image.url;
+                    
+                    if (image.hqUrl) {
+                        console.log('Checking high-quality URL:', image.hqUrl);
+                        try {
+                            // Check if high-quality image exists
+                            const response = await fetch(image.hqUrl, { method: 'HEAD' });
+                            console.log('High-quality URL check response status:', response.status);
+                            if (response.ok) {
+                                bestUrl = image.hqUrl;
+                                console.log('✅ Using high-quality image:', bestUrl);
+                            } else {
+                                console.log('❌ High-quality image not found (status ' + response.status + '), using regular:', bestUrl);
+                            }
+                        } catch (error) {
+                            console.log('❌ Error checking high-quality image:', error, 'using regular:', bestUrl);
+                        }
+                    } else {
+                        console.log('No hqUrl provided, using regular URL:', bestUrl);
+                    }
+                    
+                    this.confirmImageSelection(bestUrl);
+                },
+                
+                async completeSetup() {
+                    const setupData = {
+                        profile: {
+                            name: this.setupAnswers.name,
+                            title: this.setupAnswers.title,
+                            bio: this.setupAnswers.bio,
+                            location: this.setupAnswers.location,
+                            email: this.setupAnswers.email,
+                            githubUsername: this.setupAnswers.githubUsername,
+                            linkedInUsername: this.setupAnswers.linkedInUsername
+                        },
+                        blogEnabled: this.setupAnswers.blogEnabled === 'true',
+                        resume: [],
+                        projects: [],
+                        services: [],
+                        skills: []
+                    };
+
+                    // If we have resume data, include it
+                    if (this.resumeData) {
+                        // Add experience entries
+                        if (this.resumeData.experience) {
+                            setupData.resume = setupData.resume.concat(this.resumeData.experience);
+                        }
+                        // Add education entries
+                        if (this.resumeData.education) {
+                            setupData.resume = setupData.resume.concat(this.resumeData.education);
+                        }
+                        // Add awards entries
+                        if (this.resumeData.awards) {
+                            setupData.resume = setupData.resume.concat(this.resumeData.awards);
+                        }
+                    }
+                    
+                    try {
+                        const response = await fetch('/api/setup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(setupData)
+                        });
+                        if (response.ok) {
+                            await this.loadData();
+                            this.showSetup = false;
+                        } else {
+                            alert('Failed to complete setup');
+                        }
+                    } catch (error) {
+                        console.error('Failed to complete setup:', error);
+                        alert('Failed to complete setup');
+                    }
+                },
+                
+                addResumeEntry() {
+                    this.data.resume.push({
+                        type: 'experience',
+                        company: '',
+                        role: '',
+                        start: '',
+                        end: '',
+                        summary: '',
+                        school: '',
+                        degree: '',
+                        organization: '',
+                        award: '',
+                        certification: '',
+                        issuer: '',
+                        credentialId: '',
+                        credentialUrl: '',
+                        logo: ''
+                    });
+                },
+                
+                removeResumeEntry(index) {
+                    this.data.resume.splice(index, 1);
+                },
+                
+                addProject() {
+                    this.data.projects.push({
+                        name: '',
+                        description: '',
+                        image: '',
+                        url: '',
+                        source: '',
+                        featuredOnHome: true
+                    });
+                },
+                
+                removeProject(index) {
+                    this.data.projects.splice(index, 1);
+                },
+
+                addService() {
+                    this.data.services.push({
+                        title: '',
+                        summary: '',
+                        highlights: [],
+                        highlightsString: ''
+                    });
+                },
+
+                removeService(index) {
+                    this.data.services.splice(index, 1);
+                },
+                
+                addSkill() {
+                    this.data.skills.push({
+                        name: '',
+                        level: 50,
+                        category: 'technical'
+                    });
+                },
+                
+                removeSkill(index) {
+                    this.data.skills.splice(index, 1);
+                },
+
+                addBlogPost() {
+                    const now = new Date();
+                    const dateStr = now.toISOString().split('T')[0];
+                    const id = 'post-' + Date.now();
+                    
+                    this.data.blogPosts.push({
+                        id: id,
+                        title: '',
+                        slug: '',
+                        date: dateStr,
+                        excerpt: '',
+                        content: '',
+                        tags: [],
+                        tagsString: '',
+                        status: 'draft',
+                        featuredImage: ''
+                    });
+                },
+
+                removeBlogPost(index) {
+                    if (confirm('Are you sure you want to delete this blog post?')) {
+                        this.data.blogPosts.splice(index, 1);
+                    }
+                },
+
+                async uploadResume(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    this.resumeUploading = true;
+                    this.resumeParsed = false;
+                    this.resumeData = null;
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('resume', file);
+
+                        const response = await fetch('/api/upload-resume', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.success) {
+                            this.resumeData = result.parsedData;
+                            this.resumeParsed = true;
+                            console.log('Parsed resume data:', result.parsedData);
+                        } else {
+                            alert('Failed to parse resume: ' + (result.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Resume upload error:', error);
+                        alert('Failed to upload resume');
+                    } finally {
+                        this.resumeUploading = false;
+                        event.target.value = ''; // Clear the file input
+                    }
+                },
+
+                useResumeData() {
+                    if (!this.resumeData) return;
+
+                    // Apply profile data
+                    if (this.resumeData.profile.name) {
+                        this.setupAnswers.name = this.resumeData.profile.name;
+                    }
+                    if (this.resumeData.profile.email) {
+                        this.setupAnswers.email = this.resumeData.profile.email;
+                    }
+                    if (this.resumeData.profile.location) {
+                        this.setupAnswers.location = this.resumeData.profile.location;
+                    }
+                    if (this.resumeData.profile.title) {
+                        this.setupAnswers.title = this.resumeData.profile.title;
+                    }
+                    if (this.resumeData.profile.bio) {
+                        this.setupAnswers.bio = this.resumeData.profile.bio;
+                    }
+                    
+                    alert('Profile information has been applied to the form! Resume entries will be imported when you complete setup.');
+                },
+
+                async downloadBackup(type) {
+                    this.backupDownloading = true;
+
+                    try {
+                        const endpoint = type === 'content' ? '/api/backup/content' : '/api/backup/full';
+                        const response = await fetch(endpoint);
+
+                        if (!response.ok) {
+                            throw new Error('Backup failed');
+                        }
+
+                        // Get filename from Content-Disposition header or create default
+                        const contentDisposition = response.headers.get('Content-Disposition');
+                        let filename = type === 'content' ? 'portfolio-backup.json' : 'portfolio-backup.zip';
+
+                        if (contentDisposition) {
+                            const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+                            if (matches != null && matches[1]) {
+                                filename = matches[1].replace(/['"]/g, '');
+                            }
+                        }
+
+                        // Create blob and download
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+
+                        // Reset state
+                        this.backupDownloading = false;
+                        this.backupStep = 'initial';
+                        alert('Backup downloaded successfully!');
+                    } catch (error) {
+                        console.error('Backup error:', error);
+                        this.backupDownloading = false;
+                        alert('Failed to create backup. Please try again.');
+                    }
+                },
+
+            }
+        }
+
+        // Alpine.js is handling all the functionality
+    </script>
+</body>
+</html>

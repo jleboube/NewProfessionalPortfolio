@@ -1,0 +1,50 @@
+
+
+services:
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+      args:
+        # Use ADMIN_DOMAIN_NAME if set, otherwise use localhost with port
+        - VITE_API_URL=${ADMIN_DOMAIN_NAME:-http://localhost:6905}
+    container_name: portfolio_v2_frontend
+    ports:
+      - "${LOCAL_FRONTEND_PORT:-3005}:80"
+    depends_on:
+      - admin
+    networks:
+      - portfolio-network
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: ./apps/admin
+      dockerfile: Dockerfile
+    container_name: portfolio_v2_admin
+    env_file: ./.env
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT:-6905}
+      # Auto-configure FRONTEND_URL from DOMAIN_NAME if not explicitly set
+      - FRONTEND_URL=${FRONTEND_URL:-${DOMAIN_NAME:-http://localhost:3005}}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - ADMIN_DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
+    ports:
+      - "${LOCAL_ADMIN_PORT:-6905}:${PORT:-6905}"
+    volumes:
+      - ./content:/data
+      - ./uploads:/uploads
+    networks:
+      - portfolio-network
+    restart: unless-stopped
+
+networks:
+  portfolio-network:
+    driver: bridge
+
+volumes:
+  content:
+    driver: local
+  uploads:
+    driver: local
