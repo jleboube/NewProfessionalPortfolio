@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowUpRight, FiMenu, FiX } from 'react-icons/fi'
+import { FiMenu, FiX, FiGithub, FiExternalLink } from 'react-icons/fi'
 import type { SiteData } from '../services/api'
 import './HomePage.css'
 
@@ -96,15 +96,14 @@ const ProjectsPage = ({ data }: ProjectsPageProps) => {
                     </div>
                     <div className="project-card__links">
                       {project.url && (
-                        <a href={project.url} target="_blank" rel="noreferrer">
-                          Visit site
-                          <FiArrowUpRight aria-hidden="true" />
+                        <a href={project.url} target="_blank" rel="noreferrer" className="project-link project-link--demo">
+                          <FiExternalLink aria-hidden="true" />
+                          <span>Live Demo</span>
                         </a>
                       )}
                       {project.source && (
-                        <a href={project.source} target="_blank" rel="noreferrer">
-                          Source code
-                          <FiArrowUpRight aria-hidden="true" />
+                        <a href={project.source} target="_blank" rel="noreferrer" className="project-link project-link--github" aria-label="View source code on GitHub">
+                          <FiGithub aria-hidden="true" />
                         </a>
                       )}
                     </div>

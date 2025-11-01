@@ -35,6 +35,7 @@ services:
     volumes:
       - ./content:/data
       - ./uploads:/uploads
+      - ./sessions:/sessions
     networks:
       - portfolio-network
     restart: unless-stopped

@@ -25,6 +25,9 @@ content/data.json
 *.bak
 backups/
 
+# Session files
+sessions/
+
 # ============================================
 # Node.js
 # ============================================

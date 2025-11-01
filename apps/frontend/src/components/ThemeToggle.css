@@ -1,0 +1,133 @@
+/* Theme Toggle Container - Fixed position floating button */
+.theme-toggle-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Individual toggle buttons */
+.theme-toggle-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.theme-toggle-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.theme-toggle-button:active {
+  transform: scale(0.95);
+}
+
+/* Theme color indicator in selector button */
+.theme-color-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+}
+
+.theme-color-indicator.theme-ocean {
+  background: linear-gradient(135deg, #8fffda, #5063ff);
+}
+
+.theme-color-indicator.theme-forest {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+}
+
+.theme-color-indicator.theme-sunset {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.theme-color-indicator.theme-purple {
+  background: linear-gradient(135deg, #a855f7, #9333ea);
+}
+
+/* Theme dropdown menu */
+.theme-dropdown {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 0.5rem;
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.5rem;
+  min-width: 140px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Theme option buttons */
+.theme-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.theme-option:hover {
+  background: var(--accent-soft);
+}
+
+.theme-option.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.theme-option .theme-color-indicator {
+  flex-shrink: 0;
+}
+
+/* Overlay to close dropdown when clicking outside */
+.theme-dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .theme-toggle-container {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .theme-toggle-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .theme-dropdown {
+    min-width: 130px;
+  }
+}

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
+/* Dark Mode - Ocean Theme (Default) */
 :root {
   --bg: #05060a;
   --card: rgba(14, 17, 29, 0.8);
@@ -22,6 +23,116 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* Light Mode - Ocean Theme */
+:root.light {
+  --bg: #f8fafc;
+  --card: rgba(255, 255, 255, 0.9);
+  --card-solid: #ffffff;
+  --muted: #64748b;
+  --text: #0f172a;
+  --accent: #0ea5e9;
+  --accent-soft: rgba(14, 165, 233, 0.1);
+  --border: rgba(0, 0, 0, 0.1);
+  --gradient: radial-gradient(circle at top, rgba(14, 165, 233, 0.15), transparent 55%),
+    radial-gradient(circle at 20% 20%, rgba(125, 211, 252, 0.2), transparent 40%),
+    #f1f5f9;
+}
+
+/* Dark Mode - Forest Theme */
+:root.dark.theme-forest {
+  --bg: #05100a;
+  --card: rgba(10, 25, 15, 0.8);
+  --card-solid: #0d1f13;
+  --muted: #86a598;
+  --text: #f0fdf4;
+  --accent: #4ade80;
+  --accent-soft: rgba(74, 222, 128, 0.15);
+  --border: rgba(74, 222, 128, 0.1);
+  --gradient: radial-gradient(circle at top, rgba(34, 197, 94, 0.25), transparent 55%),
+    radial-gradient(circle at 20% 20%, rgba(74, 222, 128, 0.2), transparent 40%),
+    #031508;
+}
+
+/* Light Mode - Forest Theme */
+:root.light.theme-forest {
+  --bg: #f0fdf4;
+  --card: rgba(255, 255, 255, 0.9);
+  --card-solid: #ffffff;
+  --muted: #15803d;
+  --text: #052e16;
+  --accent: #16a34a;
+  --accent-soft: rgba(22, 163, 74, 0.1);
+  --border: rgba(22, 163, 74, 0.15);
+  --gradient: radial-gradient(circle at top, rgba(34, 197, 94, 0.1), transparent 55%),
+    radial-gradient(circle at 20% 20%, rgba(134, 239, 172, 0.15), transparent 40%),
+    #dcfce7;
+}
+
+/* Dark Mode - Sunset Theme */
+:root.dark.theme-sunset {
+  --bg: #0a0502;
+  --card: rgba(25, 15, 5, 0.8);
+  --card-solid: #1f1305;
+  --muted: #d4a574;
+  --text: #fefce8;
+  --accent: #fbbf24;
+  --accent-soft: rgba(251, 191, 36, 0.15);
+  --border: rgba(251, 191, 36, 0.1);
+  --gradient: radial-gradient(circle at top, rgba(245, 158, 11, 0.25), transparent 55%),
+    radial-gradient(circle at 20% 20%, rgba(252, 211, 77, 0.2), transparent 40%),
+    #0f0805;
+}
+
+/* Light Mode - Sunset Theme */
+:root.light.theme-sunset {
+  --bg: #fefce8;
+  --card: rgba(255, 255, 255, 0.9);
+  --card-solid: #ffffff;
+  --muted: #b45309;
+  --text: #451a03;
+  --accent: #d97706;
+  --accent-soft: rgba(217, 119, 6, 0.1);
+  --border: rgba(217, 119, 6, 0.15);
+  --gradient: radial-gradient(circle at top, rgba(245, 158, 11, 0.1), transparent 55%),
+    radial-gradient(circle at 20% 20%, rgba(253, 224, 71, 0.15), transparent 40%),
+    #fef3c7;
+}
+
+/* Dark Mode - Purple Theme */
+:root.dark.theme-purple {
+  --bg: #0a0214;
+  --card: rgba(20, 5, 30, 0.8);
+  --card-solid: #1a0829;
+  --muted: #c4b5fd;
+  --text: #faf5ff;
+  --accent: #a855f7;
+  --accent-soft: rgba(168, 85, 247, 0.15);
+  --border: rgba(168, 85, 247, 0.1);
+  --gradient: radial-gradient(circle at top, rgba(147, 51, 234, 0.25), transparent 55%),
+    radial-gradient(circle at 20% 20%, rgba(192, 132, 252, 0.2), transparent 40%),
+    #140524;
+}
+
+/* Light Mode - Purple Theme */
+:root.light.theme-purple {
+  --bg: #faf5ff;
+  --card: rgba(255, 255, 255, 0.9);
+  --card-solid: #ffffff;
+  --muted: #7c3aed;
+  --text: #3b0764;
+  --accent: #9333ea;
+  --accent-soft: rgba(147, 51, 234, 0.1);
+  --border: rgba(147, 51, 234, 0.15);
+  --gradient: radial-gradient(circle at top, rgba(168, 85, 247, 0.1), transparent 55%),
+    radial-gradient(circle at 20% 20%, rgba(216, 180, 254, 0.15), transparent 40%),
+    #f3e8ff;
+}
+
+/* Smooth theme transitions */
+:root {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 *,
 *::before,
 *::after {
@@ -32,6 +143,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background: var(--gradient);
+  transition: background 0.3s ease;
 }
 
 #root {

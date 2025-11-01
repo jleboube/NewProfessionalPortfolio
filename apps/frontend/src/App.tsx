@@ -6,6 +6,7 @@ import ServicesPage from './pages/ServicesPage'
 import BlogPage from './pages/BlogPage'
 import BlogPostPage from './pages/BlogPostPage'
 import { useData } from './hooks/useData'
+import { ThemeToggle } from './components/ThemeToggle'
 
 function App() {
   const { data, loading, error } = useData()
@@ -35,6 +36,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ThemeToggle />
       <Routes>
         <Route path="/" element={<HomePage data={data} />} />
         <Route path="/projects" element={<ProjectsPage data={data} />} />

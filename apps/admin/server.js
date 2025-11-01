@@ -1,6 +1,7 @@
 import express from 'express';
 import basicAuth from 'express-basic-auth';
 import session from 'express-session';
+import FileStore from 'session-file-store';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -126,11 +127,20 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
+// Configure file-based session store (production-ready)
+const SessionStore = FileStore(session);
+const sessionStore = new SessionStore({
+  path: '/sessions',
+  ttl: 86400, // 24 hours in seconds
+  reapInterval: 3600 // Clean up expired sessions every hour
+});
+
 app.use(session({
+  store: sessionStore,
   secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
-  cookie: { 
+  cookie: {
     secure: false,
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000

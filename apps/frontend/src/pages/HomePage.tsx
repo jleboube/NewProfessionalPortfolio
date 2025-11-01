@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowUpRight, FiGithub, FiLinkedin, FiMail, FiMenu, FiX } from 'react-icons/fi'
+import { FiArrowUpRight, FiGithub, FiLinkedin, FiMail, FiMenu, FiX, FiExternalLink } from 'react-icons/fi'
 import type { SiteData } from '../services/api'
 import './HomePage.css'
 
@@ -335,18 +335,19 @@ const HomePage = ({ data }: HomePageProps) => {
                       <h3>{project.name}</h3>
                       <p>{project.description}</p>
                     </div>
-                    {project.url && (
-                      <a href={project.url} target="_blank" rel="noreferrer">
-                        Visit site
-                        <FiArrowUpRight aria-hidden="true" />
-                      </a>
-                    )}
-                    {!project.url && project.source && (
-                      <a href={project.source} target="_blank" rel="noreferrer">
-                        View source
-                        <FiArrowUpRight aria-hidden="true" />
-                      </a>
-                    )}
+                    <div className="project-card__links">
+                      {project.url && (
+                        <a href={project.url} target="_blank" rel="noreferrer" className="project-link project-link--demo">
+                          <FiExternalLink aria-hidden="true" />
+                          <span>Live Demo</span>
+                        </a>
+                      )}
+                      {project.source && (
+                        <a href={project.source} target="_blank" rel="noreferrer" className="project-link project-link--github" aria-label="View source code on GitHub">
+                          <FiGithub aria-hidden="true" />
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </motion.article>
               )
