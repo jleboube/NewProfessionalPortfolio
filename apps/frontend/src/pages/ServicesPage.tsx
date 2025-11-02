@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FiMenu, FiX } from 'react-icons/fi'
 import type { SiteData } from '../services/api'
+import Footer from '../components/Footer'
 import './HomePage.css'
 
 interface ServicesPageProps {
@@ -100,10 +101,7 @@ const ServicesPage = ({ data }: ServicesPageProps) => {
         </section>
       </main>
 
-      <footer>
-        <p>© {new Date().getFullYear()} {data.profile.name}</p>
-        <Link to="/">Back to home</Link>
-      </footer>
+      <Footer profileName={data.profile.name} />
     </div>
   )
 }

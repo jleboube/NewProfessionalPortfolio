@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { FiMenu, FiX } from 'react-icons/fi'
 import type { SiteData } from '../services/api'
+import Footer from '../components/Footer'
 import './HomePage.css'
 
 interface ResumePageProps {
@@ -204,10 +205,7 @@ const ResumePage = ({ data }: ResumePageProps) => {
         </section>
       </main>
 
-      <footer>
-        <p>© {new Date().getFullYear()} {data.profile.name}</p>
-        <Link to="/">Back to home</Link>
-      </footer>
+      <Footer profileName={data.profile.name} />
     </div>
   )
 }

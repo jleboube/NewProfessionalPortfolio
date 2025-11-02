@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FiArrowUpRight, FiGithub, FiLinkedin, FiMail, FiMenu, FiX, FiExternalLink } from 'react-icons/fi'
 import type { SiteData } from '../services/api'
+import Footer from '../components/Footer'
 import './HomePage.css'
 
 interface HomePageProps {
@@ -451,12 +452,11 @@ const HomePage = ({ data }: HomePageProps) => {
         </section>
       </main>
 
-      <footer>
-        <p>© {new Date().getFullYear()} {data.profile.name}. Built with React, Vite, and Framer Motion.</p>
-        <button type="button" onClick={() => smoothScroll('hero')}>
-          Back to top
-        </button>
-      </footer>
+      <Footer
+        profileName={data.profile.name}
+        variant="home"
+        onBackToTop={() => smoothScroll('hero')}
+      />
     </div>
   )
 }
